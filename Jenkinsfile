@@ -120,6 +120,7 @@ pipeline {
         stage('Staging E2E') {
             environment {
                 CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
+                REACT_APP_VERSION = "${env.REACT_APP_VERSION}"
             }
             agent {
                 docker {
