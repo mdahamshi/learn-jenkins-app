@@ -101,6 +101,36 @@ pipeline {
                 }
             }
         }
+
+        stage('Prod E2E') {
+            environment {
+                CI_ENVIRONMENT_URL = 'http://learn.k3.l'
+            }
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.60.0-noble'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    npx playwright test --reporter=html
+                '''
+            }
+            post {
+                always {
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright Report Prod',
+                        useWrapperFileDirectly: true
+                    ])
+                }
+            }
+        }
     }
 
     post {
