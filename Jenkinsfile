@@ -132,7 +132,9 @@ pipeline {
         }
         stage('Approval') {
             steps {
-                input message:'Ready to Deploy ?', ok: 'Yes, export the magic !'
+                timeput(time: 4, unit: 'MINUTES') {
+                    input message:'Ready to Deploy ?', ok: 'Yes, export the magic !'
+                }
             }
         }
         stage('Deploy Prod') {
