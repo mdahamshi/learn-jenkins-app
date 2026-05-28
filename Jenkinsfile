@@ -4,6 +4,7 @@ pipeline {
         IMAGE_NAME = 'ghcr.io/mdahamshi/learn-jenkins-app'
         IMAGE_TAG = "${BUILD_NUMBER}"
         GITHUB_TOKEN = credentials('github-token')
+        REACT_APP_VERSION = "1.0.$BUILD_ID"
     }
     stages {
         stage('Build') {
