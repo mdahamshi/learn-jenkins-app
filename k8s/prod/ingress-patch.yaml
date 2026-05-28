@@ -5,3 +5,12 @@ metadata:
 spec:
   rules:
   - host: learn.k3.l
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: learn-jenkins-app
+            port:
+              number: 80
