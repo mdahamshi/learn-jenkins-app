@@ -97,6 +97,7 @@ pipeline {
                         sed -i 's|newTag: ".*"|newTag: "'"$IMAGE_TAG"'"|' k8s/staging/kustomization.yaml
                         kubectl --kubeconfig=/tmp/k3s-config apply -k k8s/staging
                         kubectl --kubeconfig=/tmp/k3s-config rollout status deployment/learn-jenkins-app -n staging
+                        echo you can access staging at: http://$(kubectl --kubeconfig=/tmp/k3s-config -n staging get ingress learn-jenkins-app -ojson | jq -r '.spec.rules[0].host')
                         rm -f /tmp/k3s-config
                     '''
                 }
@@ -140,6 +141,10 @@ pipeline {
         stage('Deploy Prod') {
             steps {
                 echo 'Deploying ...'
+                script {
+                    env.DEPLOYMENT_DATE = sh(script: 'data', returnStdout: true)
+                }
+                echo "Deployment date: ${env.DEPLOYMENT_DATE}"
                 withCredentials([string(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
                     sh '''
                         echo "$KUBECONFIG_CONTENT" | base64 -d > /tmp/k3s-config
