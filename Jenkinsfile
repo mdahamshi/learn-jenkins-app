@@ -88,23 +88,24 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy Staging') {
             steps {
                 withCredentials([string(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
                     sh '''
                         echo "$KUBECONFIG_CONTENT" | base64 -d > /tmp/k3s-config
                         chmod 600 /tmp/k3s-config
-                        sed -i 's|newTag: ".*"|newTag: "'"$IMAGE_TAG"'"|' k8s/kustomization.yaml
-                        kubectl --kubeconfig=/tmp/k3s-config apply -k k8s/
+                        sed -i 's|newTag: ".*"|newTag: "'"$IMAGE_TAG"'"|' k8s/staging/kustomization.yaml
+                        kubectl --kubeconfig=/tmp/k3s-config apply -k k8s/staging
+                        kubectl --kubeconfig=/tmp/k3s-config rollout status deployment/learn-jenkins-app -n staging
                         rm -f /tmp/k3s-config
                     '''
                 }
             }
         }
 
-        stage('Prod E2E') {
+        stage('Staging E2E') {
             environment {
-                CI_ENVIRONMENT_URL = 'http://learn.k3.l'
+                CI_ENVIRONMENT_URL = 'http://learn-staging.k3.l'
             }
             agent {
                 docker {
@@ -113,9 +114,7 @@ pipeline {
                 }
             }
             steps {
-                sh '''
-                    npx playwright test --reporter=html
-                '''
+                sh 'npx playwright test --reporter=html'
             }
             post {
                 always {
@@ -125,9 +124,29 @@ pipeline {
                         keepAll: true,
                         reportDir: 'playwright-report',
                         reportFiles: 'index.html',
-                        reportName: 'Playwright Report Prod',
+                        reportName: 'Playwright Report Staging',
                         useWrapperFileDirectly: true
                     ])
+                }
+            }
+        }
+        stage('Approval') {
+            steps {
+                input message:'Ready to Deploy ?', ok: 'Yes, export the magic !'
+            }
+        }
+        stage('Deploy Prod') {
+            steps {
+                echo 'Deploying ...'
+                withCredentials([string(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
+                    sh '''
+                        echo "$KUBECONFIG_CONTENT" | base64 -d > /tmp/k3s-config
+                        chmod 600 /tmp/k3s-config
+                        sed -i 's|newTag: ".*"|newTag: "'"$IMAGE_TAG"'"|' k8s/prod/kustomization.yaml
+                        kubectl --kubeconfig=/tmp/k3s-config apply -k k8s/prod
+                        kubectl --kubeconfig=/tmp/k3s-config rollout status deployment/learn-jenkins-app -n default
+                        rm -f /tmp/k3s-config
+                    '''
                 }
             }
         }
