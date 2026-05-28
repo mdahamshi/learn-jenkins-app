@@ -97,16 +97,28 @@ pipeline {
                         sed -i 's|newTag: ".*"|newTag: "'"$IMAGE_TAG"'"|' k8s/staging/kustomization.yaml
                         kubectl --kubeconfig=/tmp/k3s-config apply -k k8s/staging
                         kubectl --kubeconfig=/tmp/k3s-config rollout status deployment/learn-jenkins-app -n staging
-                        echo you can access staging at: http://$(kubectl --kubeconfig=/tmp/k3s-config -n staging get ingress learn-jenkins-app -ojson | jq -r '.spec.rules[0].host')
                         rm -f /tmp/k3s-config
                     '''
+
+                    script {
+                        env.STAGING_URL = sh(
+                            script: '''
+                                echo "$KUBECONFIG_CONTENT" | base64 -d > /tmp/k3s-config
+                                kubectl --kubeconfig=/tmp/k3s-config get ingress learn-jenkins-app -n staging -o jsonpath='{.spec.rules[0].host}'
+                                rm -f /tmp/k3s-config
+                            ''',
+                            returnStdout: true
+                        ).trim()
+                        env.STAGING_URL = "http://${env.STAGING_URL}"
+                        echo "Staging available at: ${env.STAGING_URL}"
+                    }
                 }
             }
         }
 
         stage('Staging E2E') {
             environment {
-                CI_ENVIRONMENT_URL = 'http://learn-staging.k3.l'
+                CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
             }
             agent {
                 docker {
@@ -142,7 +154,7 @@ pipeline {
             steps {
                 echo 'Deploying ...'
                 script {
-                    env.DEPLOYMENT_DATE = sh(script: 'data', returnStdout: true)
+                    env.DEPLOYMENT_DATE = sh(script: 'date', returnStdout: true)
                 }
                 echo "Deployment date: ${env.DEPLOYMENT_DATE}"
                 withCredentials([string(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
