@@ -131,13 +131,13 @@ pipeline {
                 }
             }
         }
-        stage('Approval') {
-            steps {
-                timeout(time: 4, unit: 'MINUTES') {
-                    input message:'Ready to Deploy ?', ok: 'Yes, export the magic !'
-                }
-            }
-        }
+        // stage('Approval') {
+        //     steps {
+        //         timeout(time: 4, unit: 'MINUTES') {
+        //             input message:'Ready to Deploy ?', ok: 'Yes, export the magic !'
+        //         }
+        //     }
+        // }
         stage('Deploy Prod') {
             steps {
                 echo 'Deploying ...'
