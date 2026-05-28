@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: staging
 resources:
   - ../base
+  - namespace.yaml
 images:
   - name: ghcr.io/mdahamshi/learn-jenkins-app
     newTag: "${IMAGE_TAG}"
