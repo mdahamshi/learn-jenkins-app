@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learn-jenkins-app
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: learn-jenkins-app
+  template:
+    metadata:
+      labels:
+        app: learn-jenkins-app
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/mdahamshi/learn-jenkins-app
+          ports:
+            - containerPort: 80
