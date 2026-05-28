@@ -120,7 +120,6 @@ pipeline {
         stage('Staging E2E') {
             environment {
                 CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
-                REACT_APP_VERSION = "${env.REACT_APP_VERSION}"
             }
             agent {
                 docker {
@@ -129,7 +128,10 @@ pipeline {
                 }
             }
             steps {
-                sh 'npx playwright test --reporter=html'
+                sh '''
+                    echo "REACT_APP_VERSION is: $REACT_APP_VERSION"
+                    npx playwright test --reporter=html
+                '''
             }
             post {
                 always {
