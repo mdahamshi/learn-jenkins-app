@@ -3,6 +3,9 @@ pipeline {
     environment {
         AWS_S3_BUCKET = 'learn-jenkins-26'
         AWS_DEFAULT_REGION = 'us-east-1'
+        AWS_ECS_CLUSTER = 'worthy-butterfly-hlfyov '
+        AWS_ECS_SERVICE_PROD = 'learnJenkinsApp-TaskDefenition-Prod-service-7rk2bivu'
+        AWS_ECS_TD_PROD = 'learnJenkinsApp-TaskDefenition-Prod'
     }
 
     stages {
@@ -21,12 +24,12 @@ pipeline {
                         LATEST_TD_REVISION=$(aws ecs register-task-definition \
                             --cli-input-json file://aws/task-definition-prod.json | jq '.taskDefinition.revision')
                         aws ecs update-service \
-                            --cluster worthy-butterfly-hlfyov \
-                            --service learnJenkinsApp-TaskDefenition-Prod-service-7rk2bivu  \
-                            --task-definition learnJenkinsApp-TaskDefenition-Prod:$LATEST_TD_REVISION
+                            --cluster $AWS_ECS_CLUSTER \
+                            --service $AWS_ECS_SERVICE_PROD  \
+                            --task-definition $AWS_ECS_TD_PROD:$LATEST_TD_REVISION
                         aws ecs wait services-stable \
-                            --cluster worthy-butterfly-hlfyov  \
-                            --services learnJenkinsApp-TaskDefenition-Prod-service-7rk2bivu
+                            --cluster $AWS_ECS_CLUSTER  \
+                            --services $AWS_ECS_SERVICE_PROD
 
                     '''
                 }
