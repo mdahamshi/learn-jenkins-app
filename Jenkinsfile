@@ -24,6 +24,9 @@ pipeline {
                             --cluster worthy-butterfly-hlfyov \
                             --service learnJenkinsApp-TaskDefenition-Prod-service-7rk2bivu  \
                             --task-definition learnJenkinsApp-TaskDefenition-Prod:$LATEST_TD_REVISION
+                        aws ecs wait services-stable \
+                            --cluster worthy-butterfly-hlfyov  \
+                            --services learnJenkinsApp-TaskDefenition-Prod-service-7rk2bivu
 
                     '''
                 }
