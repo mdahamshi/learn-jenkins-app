@@ -18,7 +18,7 @@ pipeline {
                     sh '''
                         aws --version
                         aws ecs register-task-definition \
-                            --cli-input-json aws/task-definition-prod.json
+                            --cli-input-json file://aws/task-definition-prod.json
 
                     '''
                 }
