@@ -10,7 +10,7 @@ pipeline {
             agent {
                 docker {
                     image 'amazon/aws-cli'
-                    args '-u root --entrypoint=""'
+                    args '--entrypoint=""'
                     reuseNode true
                 }
             }
@@ -18,8 +18,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
-                        yum install jq -y
-                        LATEST_TD_REVISION = $(aws ecs register-task-definition \
+                        LATEST_TD_REVISION=$(aws ecs register-task-definition \
                             --cli-input-json file://aws/task-definition-prod.json | jq '.taskDefinition.revision')
                         aws ecs update-service \
                             --cluster worthy-butterfly-hlfyov \
