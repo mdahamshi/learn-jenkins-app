@@ -20,6 +20,10 @@ pipeline {
                         aws --version
                         aws ecs register-task-definition \
                             --cli-input-json file://aws/task-definition-prod.json
+                        aws ecs update-service \
+                            --cluster worthy-butterfly-hlfyov \
+                            --service learnJenkinsApp-TaskDefenition-Prod-service-7rk2bivu  \
+                            --task-definition learnJenkinsApp-TaskDefenition-Prod:2
 
                     '''
                 }
