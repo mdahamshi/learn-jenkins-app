@@ -1,6 +1,7 @@
 pipeline {
     agent any
     environment {
+        AWS_DOCKER_REGISTRY = '953907014716.dkr.ecr.us-east-1.amazonaws.com'
         REACT_APP_VERSION = "1.0.$BUILD_ID"
         APP_NAME = 'learnjenkinsapp'
         AWS_S3_BUCKET = 'learn-jenkins-26'
@@ -33,14 +34,18 @@ pipeline {
         stage('Build Docker image') {
             agent {
                 docker {
-                    image 'docker:latest'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
+                    image 'myaws'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock -u root --entrypoint=""'
                     reuseNode true
                 }
             }
             steps {
                 sh '''
-            docker build -t $APP_NAME:$REACT_APP_VERSION .
+                docker build -t $AWS_DOCKER_REGISTRY/$APP_NAME:$REACT_APP_VERSION .
+                aws ecr get-login-password | \
+                    docker login --username AWS --password-stdin $AWS_DOCKER_REGISTRY
+                docker push $AWS_DOCKER_REGISTRY/$APP_NAME:$REACT_APP_VERSION
+
         '''
             }
         }

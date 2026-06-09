@@ -1,2 +1,2 @@
-FROM amazon/aws-cli
-
+FROM docker:latest
+RUN apk add --no-cache aws-cli
