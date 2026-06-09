@@ -1,34 +1,9 @@
 pipeline {
     agent any
-    environment {
-        AWS_S3_BUCKET = 'learn-jenkins-26'
-        AWS_DEFAULT_REGION = 'us-east-1'
-        AWS_ECS_CLUSTER = 'worthy-butterfly-hlfyov '
-        AWS_ECS_SERVICE_PROD = 'learnJenkinsApp-TaskDefenition-Prod-service-7rk2bivu'
-        AWS_ECS_TD_PROD = 'learnJenkinsApp-TaskDefenition-Prod'
-    }
 
     stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                    ls -la
-                    node --version
-                    npm --version
-                    npm ci
-                    npm run build
-                    ls -la
-                '''
-            }
-        }
 
-        stage('Build Docker image') {
+        stage('Build Docker images') {
             agent {
                 docker {
                     image 'docker:latest'
@@ -38,7 +13,8 @@ pipeline {
             }
             steps {
                 sh '''
-            docker build -t myjenkinsapp .
+            docker build -f ci/Dockerfile-playright -t myplayright .
+            docker build -f ci/Dockerfile-aws-cli -t myaws .
         '''
             }
         }
@@ -46,7 +22,7 @@ pipeline {
         stage('Deploy to AWS') {
             agent {
                 docker {
-                    image 'myaws'
+                    image 'amazon/aws-cli'
                     args '--entrypoint=""'
                     reuseNode true
                 }
