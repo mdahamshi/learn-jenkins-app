@@ -1,5 +1,5 @@
 # using jenkins already built app
 FROM mcr.microsoft.com/playwright:v1.39.0-jammy
-RUN npm install -g netlify-cli server
+RUN npm install -g server
 RUN apt update && apt install jq -y
 
